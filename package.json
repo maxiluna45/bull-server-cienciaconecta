@@ -15,6 +15,7 @@
     "bull-arena": "^4.0.1",
     "dotenv": "^16.3.1",
     "googleapis": "^126.0.1",
+    "mongoose": "^7.5.2",
     "nodemailer": "^6.9.5"
   },
   "devDependencies": {

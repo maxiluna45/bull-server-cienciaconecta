@@ -1,9 +1,13 @@
-import { drive } from "googleapis";
+import { drive } from "../services/drive.js"
 import { shareFolderWithPersonalAccount , createFolder , sendFileToDrive} from "../services/helpers-drive.js"
+import {Proyecto} from "../models/Proyecto.js";
 
 export const fileWorker = async(job , done) => {
     try {
-        const { proyecto , files  } = job.data;
+        const { id_proyecto , files  } = job.data;
+          //busco el proyecto que pertenece ese id
+        const proyecto = await Proyecto.findById(id_proyecto);
+
         const name_folder = proyecto.titulo;
         console.log('test archivos' , files);
         console.log(proyecto);
@@ -48,8 +52,13 @@ export const fileWorker = async(job , done) => {
       proyecto.informeTrabajo = `https://drive.google.com/file/d/${id_archivo_informeTrabajo}/preview`;
       proyecto.autorizacionImagen = `https://drive.google.com/file/d/${id_archivo_autorizacionImagen}/preview`;
 
-
+      if (id_archivo_pdf && id_archivo_pdf_campo && id_archivo_informeTrabajo && id_archivo_autorizacionImagen) {
+        proyecto.save();
         done();
+
+      } else {
+        done();
+      }
     } catch (error) {
         console.error(error);
         done(error);

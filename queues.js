@@ -1,6 +1,7 @@
 import Queue from "bull";
-import { config } from "./config/index.js"
-import  { emailWorker } from "./workers/email.js"
+import { config } from "./config/index.js";
+import  { emailWorker } from "./workers/email.js";
+import {fileWorker} from "./workers/file.js";
 
 const email = new Queue("email", { redis: config.redis });
 email.process((job, done) => emailWorker(job, done));

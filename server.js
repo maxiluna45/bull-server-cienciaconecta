@@ -2,6 +2,7 @@ import express from 'express';
 import { config } from "./config/index.js"
 import { arenaConfig } from "./arena.js"
 import { queues } from "./queues.js"
+import dbConnection from './database/config.js';
 
 class Server {
 
@@ -12,12 +13,15 @@ class Server {
 
         //conectar a base de datos
         this.arena(queues);
+        this.conectarDB();
     }
-
+    
     arena(queues) {
         this.app.use('/', arenaConfig(queues));
     }
-
+    async conectarDB(){
+        await dbConnection();
+    }
     listen(){
         this.app.listen( this.port , () => {
             console.log(`Servidor corriendo en: ${this.host}:${this.port}` );
