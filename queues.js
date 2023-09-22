@@ -2,7 +2,7 @@ import Queue from "bull";
 import { config } from "./config/index.js"
 import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, } from "./workers/email.js"
 
-const email = new Queue("email", { redis: config.redis });
+export const email = new Queue("email", { redis: config.redis });
 //email.process((job, done) => emailWorker(job, done));
 
 email.process("email:altaUsuario", async (job, done) => {
