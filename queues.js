@@ -3,8 +3,69 @@ import { config } from "./config/index.js";
 import  { emailWorker } from "./workers/email.js";
 import {fileWorker} from "./workers/file.js";
 
-const email = new Queue("email", { redis: config.redis });
-email.process((job, done) => emailWorker(job, done));
+import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, } from "./workers/email.js"
+
+export const email = new Queue("email", { redis: config.redis });
+//email.process((job, done) => emailWorker(job, done));
+
+email.process("email:altaUsuario", async (job, done) => {
+  try {
+    const { usuario, docente } = job.data;
+    await sendAltaEmailTo(usuario, docente);
+    job.progress(100);
+    done()
+
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+});
+
+
+email.process("email:confirmacionUsuario", async (job, done) => {
+  try {
+    const { tokenConfirm, mail } = job.data;
+    await sendConfirmationEmailTo(tokenConfirm, mail);
+    job.progress(100);
+    done()
+
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+
+});
+
+
+email.process("email:seleccionEvaluador", async (job, done) => {
+  try {
+    const { usuario, docente } = job.data;
+    await sendSeleccionEmailTo(usuario, docente);
+    job.progress(100);
+    done()
+
+  } catch (error) {
+
+    job.progress(100); 
+    done(error)
+
+  }
+});
+
+email.process("email:recuperacionContrasena", async (job) => {
+  try {
+    const { token, usuario } = job.data;
+    await sendRecoveryEmailTo(token, usuario);
+    job.progress(100);
+    done()
+
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+});
+
+
 
 const file = new Queue("file",{redis: config.redis});
 file.process((job, done) => fileWorker(job,done));
