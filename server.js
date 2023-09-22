@@ -21,6 +21,7 @@ class Server {
     listen(){
         this.app.listen( this.port , () => {
             console.log(`Servidor corriendo en: ${this.host}:${this.port}` );
+            console.log(`Arena Dashboard corriendo en ${this.host}:${this.port}/arena`)
         });
     }
 
