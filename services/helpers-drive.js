@@ -76,3 +76,26 @@ export const sendFileToDrive = (files_pdf, myFolder, drive) => {
     }
   });
 };
+
+export const getIdByUrl = (url) => {
+  const match = url.match(/\/file\/d\/([^/]+)\//);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+}
+
+export const deleteFile = (fileId, drive) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await drive.files.delete({
+        fileId: fileId,
+      });
+      console.log(`Archivo con ID ${fileId} eliminado correctamente.`);
+      resolve(true); // El archivo se eliminó con éxito
+    } catch (error) {
+      console.error(`Error al eliminar el archivo con ID ${fileId}:`, error.message);
+      reject(false); // Error al eliminar el archivo
+    }
+  });
+};

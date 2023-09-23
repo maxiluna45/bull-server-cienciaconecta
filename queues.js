@@ -1,7 +1,6 @@
 import Queue from "bull";
 import { config } from "./config/index.js";
-import  { emailWorker } from "./workers/email.js";
-import {fileWorker} from "./workers/file.js";
+import {fileWorker , ActualizarDocumentsWotker ,} from "./workers/file.js";
 
 import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, } from "./workers/email.js"
 
@@ -70,6 +69,13 @@ email.process("email:recuperacionContrasena", async (job) => {
 const file = new Queue("file",{redis: config.redis});
 file.process((job, done) => fileWorker(job,done));
 
+const fileUpdate = new Queue("fileUpdate",{redis: config.redis});
+fileUpdate.process((job, done) => ActualizarDocumentsWotker(job,done));
+
+
+
+
+
 export const queues = [
     {
       name: "email",
@@ -79,6 +85,11 @@ export const queues = [
     {
       name:"file",
       hostId:"File Queue Manager",
+      redis: config.redis,
+    },
+    {
+      name:"fileUpdate",
+      hostId:"File Update Queue Manager",
       redis: config.redis,
     }
 ];
