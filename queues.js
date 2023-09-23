@@ -1,6 +1,6 @@
 import Queue from "bull";
 import { config } from "./config/index.js";
-import {fileWorker , ActualizarDocumentsWotker ,} from "./workers/file.js";
+import {fileWorker , ActualizarDocumentsWotker , UploadCv} from "./workers/file.js";
 
 import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, } from "./workers/email.js"
 
@@ -72,7 +72,8 @@ file.process((job, done) => fileWorker(job,done));
 const fileUpdate = new Queue("fileUpdate",{redis: config.redis});
 fileUpdate.process((job, done) => ActualizarDocumentsWotker(job,done));
 
-
+const fileCv = new Queue("fileCv",{redis: config.redis});
+fileCv.process((job, done) => UploadCv(job,done));
 
 
 

@@ -7,6 +7,8 @@ import {
   getIdByUrl,
 } from "../services/helpers-drive.js";
 import { Proyecto } from "../models/Proyecto.js";
+import { Evaluador } from "../models/Evaluador.js";
+import { Docente } from "../models/Docente.js";
 
 export const fileWorker = async (job, done) => {
   try {
@@ -146,3 +148,42 @@ export const ActualizarDocumentsWotker = async (job, done) => {
     done(error);
   }
 }
+
+export const UploadCv = async(job, done) => {
+  try {
+    const {uid , files} = job.data;
+
+    const _docente = await Docente.findOne({ usuario: uid });
+    const evaluador = await Evaluador.findOne({ idDocente: _docente.id });
+
+    const name_folder = _docente.cuil;
+    //creo la nueva carpeta
+    const id_folder_new = await createFolder(name_folder, drive);
+    console.log(name_folder);
+    console.log('carpeta',id_folder_new);
+    if (id_folder_new) {
+      evaluador.id_carpeta_cv = id_folder_new;
+      // Compartir la carpeta creada en paralelo
+      const email_ciencia_conecta = "cienciaconecta.utn@gmail.com";
+      await shareFolderWithPersonalAccount(
+        id_folder_new,
+        email_ciencia_conecta,
+        drive,
+        "writer"
+      );
+      const id_cv = await sendFileToDrive(files.cv, id_folder_new, drive);
+      if (id_cv) {
+        evaluador.CV = `${id_cv}`;
+        await evaluador.save();
+        done();
+      } else {
+        done(error);
+      }
+    } else {
+      done(error);
+    }
+  } catch (error) {
+    console.error(error);
+    done();
+  }
+} 
