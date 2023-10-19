@@ -1,11 +1,36 @@
 import Queue from "bull";
 import { config } from "./config/index.js";
-import {fileWorker , ActualizarDocumentsWotker , UploadCv} from "./workers/file.js";
+import {fileWorker , ActualizarDocumentsWotker , UploadCv, UpdateFiles, UploadFiles} from "./workers/file.js";
 
 import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, } from "./workers/email.js"
 
 export const email = new Queue("email", { redis: config.redis });
+export const files_ = new Queue("files_", { redis: config.redis });
 //email.process((job, done) => emailWorker(job, done));
+files_.process("files_:upload", async (job, done) => {
+  try {
+    const { id_proyecto, files , name_files } = job.data;
+    await UploadFiles(id_proyecto, files , name_files );
+    job.progress(100);
+    done()
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+});
+
+files_.process("files_:update", async (job, done) => {
+  try {
+    const { id , files , name_files } = job.data;
+    await UpdateFiles(id, files , name_files);
+    job.progress(100);
+    done()
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+});
+
 
 email.process("email:altaUsuario", async (job, done) => {
   try {
