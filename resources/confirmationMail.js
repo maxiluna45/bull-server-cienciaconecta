@@ -54,9 +54,9 @@ export const confirmationMailHtml = (token) =>`
         <h2 style="color: #00ACE6;">¡Bienvenido a Ciencia Conecta!</h2>
         <p class="black-text" style="font-size: 16px;">Estamos emocionados de que formes parte de nuestra plataforma</p>
         <p class="black-text" style="font-size: 16px;">Hacé clic en el siguiente botón para verificar tu cuenta:</p>
-        <a href="${process.env.URL_FRONT}/${confirmar}/${token}" style="display: inline-block; background-color: #00ACE6; color: #fff; padding: 10px 20px; text-decoration: none; font-size: 16px; border-radius: 5px; margin-top: 20px;">Verificar cuenta</a>
+        <a href="${process.env.URL_FRONT}/${process.env.ENDPOINT_CONFIRMAR}/${token}" style="display: inline-block; background-color: #00ACE6; color: #fff; padding: 10px 20px; text-decoration: none; font-size: 16px; border-radius: 5px; margin-top: 20px;">Verificar cuenta</a>
         <p style="font-size: 14px; color: #888; margin-top: 20px;">Si tenés problemas con el botón de verificación, también podés copiar y pegar el siguiente enlace en tu navegador:</p>
-        <p style="font-size: 14px; color: #888;"><a href="${process.env.URL_FRONT}/${confirmar}/${token}" style="color: #00ACE6; text-decoration: none;">${process.env.URL_FRONT}/${confirmar}/${token}</a></p>
+        <p style="font-size: 14px; color: #888;"><a href="${process.env.URL_FRONT}/${process.env.ENDPOINT_CONFIRMAR}/${token}" style="color: #00ACE6; text-decoration: none;">${process.env.URL_FRONT}/${process.env.ENDPOINT_CONFIRMAR}/${token}</a></p>
         <div class="marca-agua-container">
           <p class="marca-agua">CienciaConecta</p>
         </div>
