@@ -9,8 +9,8 @@ export const files_ = new Queue("files_", { redis: config.redis });
 //email.process((job, done) => emailWorker(job, done));
 files_.process("files_:upload", async (job, done) => {
   try {
-    const { id_proyecto, files , name_files } = job.data;
-    await UploadFiles(id_proyecto, files , name_files );
+    const { id, files , name_files } = job.data;
+    await UploadFiles(id, files , name_files );
     job.progress(100);
     done()
   } catch (error) {
@@ -116,6 +116,11 @@ export const queues = [
     {
       name:"fileUpdate",
       hostId:"File Update Queue Manager",
+      redis: config.redis,
+    },
+    {
+      name:"files_",
+      hostId:"File Upload/Update Queue Manager",
       redis: config.redis,
     }
 ];
