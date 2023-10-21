@@ -97,11 +97,11 @@ const feriaSchema = new Schema({
                     required: true,
                 }
             }],
-            sede: {
-                type: Schema.Types.ObjectId,
-                required: false,
-                ref: 'EstablecimientoEducativo',
-            },
+            // sede: {
+            //     type: Schema.Types.ObjectId,
+            //     required: false,
+            //     ref: 'EstablecimientoEducativo',
+            // },
         }
 
     },
@@ -201,7 +201,24 @@ export const estadoFeria = {
     instanciaProvincial_ExposicionFinalizada: '10',
     proyectosPromovidosA_instanciaNacional: '11',
     finalizada: '12',
-  };
+};
+
+export const siguienteFecha = {
+    creada: 'fechaInicioFeria',
+    iniciada: 'instancias.instanciaEscolar.fechaInicioInstancia',
+    instanciaEscolar: 'instancias.instanciaEscolar.fechaFinInstancia',
+    instanciaEscolar_Finalizada: 'instancias.instanciaRegional.fechaInicioEvaluacionTeorica',
+    instanciaRegional_EnEvaluacion: 'instancias.instanciaRegional.fechaFinEvaluacionTeorica',
+    instanciaRegional_EvaluacionFinalizada: 'instancias.instanciaRegional.fechaInicioEvaluacionPresencial',
+    instanciaRegional_EnExposicion: 'instancias.instanciaRegional.fechaFinEvaluacionPresencial',
+    instanciaRegional_ExposicionFinalizada: 'instancias.instanciaRegional.fechaPromocionAProvincial',
+    proyectosPromovidosA_instanciaProvincial: 'instancias.instanciaProvincial.fechaInicioEvaluacionPresencial',
+    instanciaProvincial_EnExposicion: 'instancias.instanciaProvincial.fechaFinEvaluacionPresencial',
+    instanciaProvincial_ExposicionFinalizada: 'instancias.instanciaRegional.fechaPromocionANacional',
+    proyectosPromovidosA_instanciaNacional: 'fechaFinFeria',
+    finalizada: 'fechaFinFeria',
+};
+
 
 export const fechasFeria = {
     fechaInicio: "fechaInicioFeria",
