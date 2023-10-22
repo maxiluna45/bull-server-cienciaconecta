@@ -68,6 +68,10 @@ export const UploadFiles = async (id_proyecto, files , name_files) => {
       id_archivo_informeTrabajo &&
       id_archivo_autorizacionImagen
     ) {
+      proyecto.nameCarpetaCampo = files.carpetaCampo.originalFilename;
+      proyecto.nameAutorizacionImagen = files.autorizacionImagen.originalFilename;
+      proyecto.nameRegistroPedagogicopdf = files.registroPedagogicopdf.originalFilename;
+      proyecto.nameInformeTrabajo = files.informeTrabajo.originalFilename;
       await proyecto.save();
     } else {
       throw new Error(`NO SE PUDO CARGAR LOS DOCUMENTOS.`);
@@ -88,7 +92,7 @@ export const UpdateFiles = async (id , files , name_files) => {
     let id_informe_trabajo = null;
     let id_autorizacion_imagen = null;
 
-    const processFile = async (file, existingFile) => {
+    const processFile = async (file, existingFile , name_original) => {
       if (file) {
         if (existingFile) {
           const id = await getIdByUrl(existingFile);
@@ -101,28 +105,36 @@ export const UpdateFiles = async (id , files , name_files) => {
         } else {
           return await sendFileToDrive(file, id_folder, drive);
         }
+        proyecto[name_original] = file.originalFilename;
       }
       return null;
     };
 
     id_archivo_pdf = await processFile(
       files.registroPedagogicopdf,
-      proyecto.registroPedagogico
+      proyecto.registroPedagogico,
+      'nameRegistroPedagogicopdf'
     );
 
     id_carpeta_campo = await processFile(
       files.carpetaCampo,
-      proyecto.carpetaCampo
+      proyecto.carpetaCampo,
+      'nameCarpetaCampo'
+
     );
 
     id_informe_trabajo = await processFile(
       files.informeTrabajo,
-      proyecto.informeTrabajo
+      proyecto.informeTrabajo,
+      'nameInformeTrabajo'
+
     );
 
     id_autorizacion_imagen = await processFile(
       files.autorizacionImagen,
-      proyecto.autorizacionImagen
+      proyecto.autorizacionImagen,
+      'nameAutorizacionImagen'
+
     );
 
     if (
@@ -143,6 +155,8 @@ export const UpdateFiles = async (id , files , name_files) => {
       proyecto.autorizacionImagen = id_autorizacion_imagen
         ? `https://drive.google.com/file/d/${id_autorizacion_imagen}/preview`
         : proyecto.autorizacionImagen;
+
+      
       await proyecto.save();
     } else {
       throw new Error(`NO SE PUDO CARGAR LOS DOCUMENTOS.`);
