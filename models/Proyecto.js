@@ -108,7 +108,11 @@ const ProyectoSchema = new Schema({
     type: [Schema.Types.ObjectId],
     required: false,
     ref: "Evaluador",
-  }
+  },
+
+  QR: {
+    type: String,
+  } 
 
 });
 
@@ -117,18 +121,26 @@ export const estado = {
   instanciaRegional: '1',
   enEvaluacionRegional: '2',
   evaluadoRegional: '3',
-  promovidoNacional: '4',
-  finalizado: '5',
-  inactivo: '6',
+  promovidoProvincial: '4',
+  enEvaluacionProvincial: '5',
+  evaluadoProvincial: '6',
+  promovidoNacional: '7',
+  finalizado: '8',
+  inactivo: '9',
+
 };
 
-export const nombreEstado = [
-  "Instancia escolar",
-  "Instancia regional",
-  "En evaluación regional",
-  "Promovido a instancia nacional",
-  "Finalizado",
-  "Inactivo",
-]
+export const nombreEstado = {
+  0: "Instancia escolar",
+  1: "Instancia regional",
+  2: "En evaluación regional",
+  3: "Evaluado en instancia regional",
+  4: "Promovido a instancia provincial",
+  5: "En evaluación provincial",
+  6: "Evaluado en instancia provincial",
+  7: "Promovido a instancia nacional",
+  8: "Finalizado",
+  9: "Inactivo",
+}
 
 export const Proyecto = model("Proyecto", ProyectoSchema);
