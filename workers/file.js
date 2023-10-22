@@ -13,16 +13,12 @@ import { Docente } from "../models/Docente.js";
 export const UploadFiles = async (id_proyecto, files , name_files) => {
   try {
     const proyecto = await Proyecto.findById(id_proyecto);
-    console.log('name_files:',name_files)
     const name_folder = proyecto.titulo;
-    console.log("test archivos", files);
-    console.log(proyecto);
     //creo la nueva carpeta
     const id_folder_new = await createFolder(name_folder, drive);
 
     //seteo el campo del proyecto "id_carpeta_drive" con el "id" de la carpeta creada
     proyecto.id_carpeta_drive = id_folder_new;
-    console.log(proyecto.id_carpeta_drive);
     // Compartir la carpeta creada en paralelo
     const email_ciencia_conecta = "cienciaconecta.utn@gmail.com";
     await Promise.all([
@@ -83,9 +79,7 @@ export const UploadFiles = async (id_proyecto, files , name_files) => {
 
 export const UpdateFiles = async (id , files , name_files) => {
   try {
-    console.log('names_files:',name_files)
     const proyecto = await Proyecto.findById(id);
-    console.log(proyecto.id_carpeta_drive);
     const id_folder = proyecto.id_carpeta_drive;
     let id_archivo_pdf = null;
     let id_carpeta_campo = null;
@@ -99,13 +93,15 @@ export const UpdateFiles = async (id , files , name_files) => {
           if (id) {
             const deleteResult = await deleteFile(id, drive);
             if (deleteResult) {
+              proyecto[name_original] = file.originalFilename;
               return await sendFileToDrive(file, id_folder, drive);
             }
           }
         } else {
+          proyecto[name_original] = file.originalFilename;
+
           return await sendFileToDrive(file, id_folder, drive);
         }
-        proyecto[name_original] = file.originalFilename;
       }
       return null;
     };
