@@ -79,6 +79,18 @@ const ProyectoSchema = new Schema({
   id_carpeta_drive: {
     type: String,
   },
+  nameCarpetaCampo: {
+    type: String,
+  },
+  nameRegistroPedagogicopdf: {
+    type: String,
+  },
+  nameAutorizacionImagen: {
+    type: String,
+  },
+  nameInformeTrabajo: {
+    type: String,
+  },
   grupoProyecto: [
     {
       nombre: {
