@@ -12,7 +12,9 @@ import { Docente } from "../models/Docente.js";
 
 export const UploadFiles = async (id_proyecto, files , name_files) => {
   try {
+    console.log(id_proyecto);
     const proyecto = await Proyecto.findById(id_proyecto);
+    console.log(proyecto);
     const name_folder = proyecto.titulo;
     //creo la nueva carpeta
     const id_folder_new = await createFolder(name_folder, drive);
@@ -94,6 +96,7 @@ export const UpdateFiles = async (id , files , name_files) => {
             const deleteResult = await deleteFile(id, drive);
             if (deleteResult) {
               proyecto[name_original] = file.originalFilename;
+              await proyecto.save();
               return await sendFileToDrive(file, id_folder, drive);
             }
           }
