@@ -56,9 +56,9 @@ export const recoveryMailHtml = (token) => `
         <h2 class="blue-text">Recuperación de Contraseña</h2>
         <p class="black-text" style="font-size: 16px;">Recibimos una solicitud de recuperación de contraseña para tu cuenta.</p>
         <p class="black-text" style="font-size: 16px;">Hacé clic en el siguiente botón para restablecer tu contraseña:</p>
-        <a href="http://localhost:5000/api/v1/auth/reset-password/${token}" style="display: inline-block; background-color: #00ACE6; color: #fff; padding: 10px 20px; text-decoration: none; font-size: 16px; border-radius: 5px; margin-top: 20px;">Restablecer Contraseña</a>
+        <a href="${process.env.URL_FRONT}/${process.env.ENDPOINT_RESETPASS}/${token}" style="display: inline-block; background-color: #00ACE6; color: #fff; padding: 10px 20px; text-decoration: none; font-size: 16px; border-radius: 5px; margin-top: 20px;">Restablecer Contraseña</a>
         <p class="black-text" style="font-size: 14px; color: #888; margin-top: 20px;">Si tenés problemas con el botón de restablecimiento, también podés copiar y pegar el siguiente enlace en tu navegador:</p>
-        <p class="black-text" style="font-size: 14px; color: #888;"><a href="http://localhost:5000/api/v1/auth/reset-password/${token}" style="color: #00ACE6; text-decoration: none;">http://localhost:5000/api/v1/auth/reset-password/${token}</a></p>
+        <p class="black-text" style="font-size: 14px; color: #888;"><a href="${process.env.URL_FRONT}/${process.env.ENDPOINT_RESETPASS}/${token}" style="color: #00ACE6; text-decoration: none;">${process.env.URL_FRONT}/${process.env.ENDPOINT_RESETPASS}/${token}</a></p>
         <div class="marca-agua-container">
           <p class="marca-agua">CienciaConecta</p>
         </div>
