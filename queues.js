@@ -145,6 +145,19 @@ processFeria('inicioExposicionProvincial', options);
 processFeria('finExposicionProvincial', options);
 processFeria('promovidosANacional', options);
 processFeria('finFeria', options);
+processFeria('inicioAsignacion', options);
+processFeria('cinco_dias_finAsignacion', options);
+processFeria('un_dia_finAsignacion', options);
+processFeria('cinco_dias_finEvaluacionRegional', options);
+processFeria('un_dia_finEvaluacionRegional', options);
+processFeria('cinco_dias_finExposicionRegional', options);
+processFeria('un_dia_finExposicionRegional', options);
+processFeria('cinco_dias_finExposicionProvincial', options);
+processFeria('un_dia_finExposicionProvincial', options);
+
+
+// Colas para Gestionar Estados de Feria por fecha -------------------------------------------------------------------------------------------
+const gestor_notificaciones = new Queue("notificaciones", {redis: config.redis});
 
 // Exportación de colas ----------------------------------------------------------------------------------------------------------------------
 export const queues = [
