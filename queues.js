@@ -2,7 +2,7 @@ import Queue from "bull";
 import { config } from "./config/index.js";
 import {fileWorker , ActualizarDocumentsWotker , UploadCv, UpdateFiles, UploadFiles} from "./workers/file.js";
 
-import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, } from "./workers/email.js"
+import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, sendPromocionEmailTo, } from "./workers/email.js"
 import { modificarEstadosFeria } from "./workers/feria.js";
 import { EventEmitter } from 'events';
 EventEmitter.setMaxListeners(30)
@@ -84,6 +84,19 @@ email.process("email:recuperacionContrasena", async (job, done) => {
   try {
     const { token, usuario } = job.data;
     await sendRecoveryEmailTo(token, usuario);
+    job.progress(100);
+    done()
+
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+});
+
+email.process("email:promocionProyecto", async (job, done) => {
+  try {
+    const { mail, proyecto, id_proyecto, instancia } = job.data;
+    await sendPromocionEmailTo(mail, proyecto, id_proyecto, instancia);
     job.progress(100);
     done()
 
