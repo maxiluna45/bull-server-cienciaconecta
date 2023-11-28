@@ -2,6 +2,7 @@ import express from 'express';
 import { config } from "./config/index.js"
 import { arenaConfig } from "./arena.js"
 import { queues } from "./queues.js"
+import cors from 'cors';
 import dbConnection from './database/config.js';
 
 class Server {
@@ -11,9 +12,15 @@ class Server {
         this.port = config.port;
         this.host = config.host;
 
-        //conectar a base de datos
+
+        this.middlewares();
         this.arena(queues);
         this.conectarDB();
+
+    }
+
+    middlewares(){
+        //this.app.use(cors({ origin: '*' }));
     }
     
     arena(queues) {

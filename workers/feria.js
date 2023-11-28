@@ -8,6 +8,8 @@ import { Feria, estadoFeria } from "../models/Feria.js";
 import { Promocion, promocionA } from "../models/Promocion.js";
 import { Proyecto, estado } from "../models/Proyecto.js";
 import { Referente } from "../models/Referente.js";
+import { Usuario } from "../models/Usuario.js";
+import { email } from "../queues.js";
 
 export const modificarEstadosFeria = async (feria_id, tipo) => {
     try {
@@ -267,7 +269,14 @@ const promoverProyectos_InstanciaProvincial = async (feria_id) => {
     for(const proyecto_id of proyectosPromocionados){
         const proyecto = await Proyecto.findById(proyecto_id.toString())
         const docente = await Docente.findById(proyecto.idResponsable.toString())
+        const usuario = await Usuario.findById(docente.usuario.toString())
         await generarNotificacion(docente.usuario.toString(), tipo_notificacion.promocion(proyecto.titulo, "Provincial"))
+        email.add("email:promocionProyecto", { 
+            mail: usuario.email,
+            proyecto: proyecto.titulo,
+            id_proyecto: proyecto._id,
+            instancia: "Provincial",
+        })
     }
 
     const proyectosNoPromocionados = await Proyecto.find({feria: feria_id, estado: estado.evaluadoRegional})
@@ -291,7 +300,14 @@ const promoverProyectos_InstanciaNacional = async (feria_id) => {
     for(const proyecto_id of proyectosPromocionados){
         const proyecto = await Proyecto.findById(proyecto_id.toString())
         const docente = await Docente.findById(proyecto.idResponsable)
+        const usuario = await Usuario.findById(docente.usuario.toString())
         await generarNotificacion(docente.usuario.toString(), tipo_notificacion.promocion(proyecto.titulo, "Nacional"))
+        email.add("email:promocionProyecto", { 
+            mail: usuario.email,
+            proyecto: proyecto.titulo,
+            id_proyecto: proyecto._id,
+            instancia: "Nacional",
+        })
     }
 
     const proyectosNoPromocionados = await Proyecto.find({feria: feria_id, estado: estado.evaluadoProvincial})

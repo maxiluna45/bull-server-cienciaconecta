@@ -4,6 +4,7 @@ import { transporter } from "../helpers/mailer.js";
 import { confirmationMailHtml } from "../resources/confirmationMail.js"
 import { recoveryMailHtml } from "../resources/recoveryMail.js"
 import { seleccionMailHtml } from "../resources/seleccionMail.js"
+import { promocionMailHtml } from "../resources/promocionMail.js";
 
 
 export const sendAltaEmailTo = async (usuario, docente) => {
@@ -75,3 +76,19 @@ export const sendSeleccionEmailTo = async (usuario, docente) => {
     }
 }
 
+
+export const sendPromocionEmailTo = async (mail, proyecto, id_proyecto, instancia) => {
+
+    const info = await transporter.sendMail({
+        from: 'Ciencia Conecta',
+        to: mail,
+        subject: `Su proyecto ha sido promovido a la instancia ${instancia}`,
+        html: promocionMailHtml(proyecto, id_proyecto, instancia)
+        });
+        
+    // Verificar si el correo se envió exitosamente
+    if (info.accepted.length === 0) {
+        // No se pudo enviar el correo
+        throw new Error(`No se pudo enviar el correo a ${mail}`);
+    }
+}
