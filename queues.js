@@ -5,6 +5,7 @@ import {fileWorker , ActualizarDocumentsWotker , UploadCv, UpdateFiles, UploadFi
 import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, sendPromocionEmailTo, } from "./workers/email.js"
 import { modificarEstadosFeria } from "./workers/feria.js";
 import { EventEmitter } from 'events';
+import { cancelarEvaluacionRegional, cancelarExposicionProvincial, cancelarExposicionRegional } from "./workers/evaluacion.js";
 EventEmitter.setMaxListeners(30)
 
 // Cola para envío de mails ------------------------------------------------------------------------------------------------------
@@ -169,8 +170,48 @@ processFeria('cinco_dias_finExposicionProvincial', options);
 processFeria('un_dia_finExposicionProvincial', options);
 
 
-// Colas para Gestionar Estados de Feria por fecha -------------------------------------------------------------------------------------------
-const gestor_notificaciones = new Queue("notificaciones", {redis: config.redis});
+// Colas para Gestionar Evaluaciones -------------------------------------------------------------------------------------------
+const gestor_evaluacion = new Queue("evaluacion", {redis: config.redis});
+
+gestor_evaluacion.process("evaluacion:Evaluacion_Regional", async (job, done) => {
+  try {
+    const { feria_id, proyecto_id } = job.data;
+    await cancelarEvaluacionRegional(feria_id, proyecto_id);
+    job.progress(100);
+    done()
+
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+});
+
+gestor_evaluacion.process("evaluacion:Exposicion_Regional", async (job, done) => {
+  try {
+    const { feria_id, proyecto_id } = job.data;
+    await cancelarExposicionRegional(feria_id, proyecto_id);
+    job.progress(100);
+    done()
+
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+});
+
+gestor_evaluacion.process("evaluacion:Exposicion_Provincial", async (job, done) => {
+  try {
+    const { feria_id, proyecto_id } = job.data;
+    await cancelarExposicionProvincial(feria_id, proyecto_id);
+    job.progress(100);
+    done()
+
+  } catch (error) {
+    job.progress(100); 
+    done(error)
+  }
+});
+
 
 // Exportación de colas ----------------------------------------------------------------------------------------------------------------------
 export const queues = [
@@ -197,6 +238,11 @@ export const queues = [
     {
       name:"files_",
       hostId:"File Upload/Update Queue Manager",
+      redis: config.redis,
+    },
+    {
+      name:"evaluacion",
+      hostId:"Evaluaciones Queue Manager",
       redis: config.redis,
     }
 ];
