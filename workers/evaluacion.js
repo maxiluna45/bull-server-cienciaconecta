@@ -44,8 +44,6 @@ export const cancelarExposicionRegional = async (feria_id, proyecto_id) => {
 
         if(evaluacion_pendiente?.evaluacion == null){
             evaluacion_pendiente.deleteOne()
-            proyecto.estado = estado.instanciaRegional;
-            proyecto.save();
         } else {
             evaluacion_pendiente.evaluando = null;
             evaluacion_pendiente.estado = estadoEvaluacion.abierta;
@@ -72,7 +70,7 @@ export const cancelarExposicionProvincial = async (feria_id, proyecto_id) => {
 
         if(evaluacion_pendiente?.evaluacion == null){
             evaluacion_pendiente.deleteOne()
-            proyecto.estado = estado.instanciaRegional;
+            proyecto.estado = estado.promovidoProvincial;
             proyecto.save();
         } else {
             evaluacion_pendiente.evaluando = null;
