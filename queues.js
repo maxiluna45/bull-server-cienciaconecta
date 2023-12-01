@@ -6,6 +6,8 @@ import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendR
 import { modificarEstadosFeria } from "./workers/feria.js";
 import { EventEmitter } from 'events';
 import { cancelarEvaluacionRegional, cancelarExposicionProvincial, cancelarExposicionRegional } from "./workers/evaluacion.js";
+import { generarNotificacion, tipo_notificacion } from "./helpers/generarNotificacion.js";
+import { actualizarEstablecimientosEducativos } from "./workers/establecimientos.js";
 EventEmitter.setMaxListeners(30)
 
 // Cola para envío de mails ------------------------------------------------------------------------------------------------------
@@ -212,6 +214,29 @@ gestor_evaluacion.process("evaluacion:Exposicion_Provincial", async (job, done) 
   }
 });
 
+// Colas para Gestionar Establecimientos Educativos -------------------------------------------------------------------------------------------
+const gestor_establecimientos = new Queue("establecimientos", {redis: config.redis});
+
+gestor_establecimientos.process("establecimientos:actualizar", async (job, done) => {
+  try {
+    const { uid, files } = job.data;
+    const actualizacion = await actualizarEstablecimientosEducativos(files, job);
+    if (actualizacion){
+      await generarNotificacion(uid, tipo_notificacion.actualizacion_exitosa)
+    } else {
+      await generarNotificacion(uid, tipo_notificacion.creacion_exitosa)
+    }
+    job.progress(100);
+    done()
+
+  } catch (error) {
+    const { uid } = job.data;
+    job.progress(100); 
+    done(error)
+    await generarNotificacion(uid, tipo_notificacion.actualizacion_fallida)
+  }
+});
+
 
 // Exportación de colas ----------------------------------------------------------------------------------------------------------------------
 export const queues = [
@@ -243,6 +268,11 @@ export const queues = [
     {
       name:"evaluacion",
       hostId:"Evaluaciones Queue Manager",
+      redis: config.redis,
+    },
+    {
+      name:"establecimientos",
+      hostId:"Establecimientos Educativos Queue Manager",
       redis: config.redis,
     }
 ];

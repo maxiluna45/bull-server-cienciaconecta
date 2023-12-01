@@ -49,4 +49,10 @@ export const tipo_notificacion = {
     un_dia_asignacion: (cantidad) =>`Sólo te queda 1 día para asignar evaluadores a los proyectos de tu sede. Te queda/n ${cantidad} proyecto/s por asignar.`,
     //
     inicio_asignacion: "Ya podés comenzar a asignar evaluadores a los proyectos de tu sede.",
+    //
+    actualizacion_exitosa: `La actualización de Establecimientos Educativos ha finalizado exitosamente`,
+    //
+    creacion_exitosa: `Se han cargado todos los Establecimientos con éxito. No existían Establecimientos Educativos almacenados previamente.`,
+    //
+    actualizacion_fallida: `Ha fallado la actualización de Establecimientos Educativos`,
 }
