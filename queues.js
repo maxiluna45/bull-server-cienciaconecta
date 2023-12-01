@@ -1,6 +1,6 @@
 import Queue from "bull";
 import { config } from "./config/index.js";
-import {fileWorker , ActualizarDocumentsWotker , UploadCv, UpdateFiles, UploadFiles} from "./workers/file.js";
+import { UploadCv, UpdateFiles, UploadFiles} from "./workers/file.js";
 
 import  { sendAltaEmailTo,  sendConfirmationEmailTo, sendSeleccionEmailTo, sendRecoveryEmailTo, sendPromocionEmailTo, } from "./workers/email.js"
 import { modificarEstadosFeria } from "./workers/feria.js";
@@ -10,14 +10,25 @@ import { generarNotificacion, tipo_notificacion } from "./helpers/generarNotific
 import { actualizarEstablecimientosEducativos } from "./workers/establecimientos.js";
 EventEmitter.setMaxListeners(30)
 
+// Configurar opciones de cola
+const options = {
+  attempts: 5, 
+  backoff: {
+    type: 'exponential',
+    delay: 2000, // Retraso inicial en milisegundos
+  },
+};
+
+
+
 // Cola para envío de mails ------------------------------------------------------------------------------------------------------
 export const email = new Queue("email", { redis: config.redis });
 export const files_ = new Queue("files_", { redis: config.redis });
 //email.process((job, done) => emailWorker(job, done));
 files_.process("files_:upload", async (job, done) => {
   try {
-    const { id, files , name_files } = job.data;
-    await UploadFiles(id, files , name_files );
+    const { uid, id, files , name_files } = job.data;
+    await UploadFiles(uid, id, files , name_files );
     job.progress(100);
     done()
   } catch (error) {
@@ -28,8 +39,8 @@ files_.process("files_:upload", async (job, done) => {
 
 files_.process("files_:update", async (job, done) => {
   try {
-    const { id , files , name_files } = job.data;
-    await UpdateFiles(id, files , name_files);
+    const { uid, id , files , name_files } = job.data;
+    await UpdateFiles(uid, id, files , name_files);
     job.progress(100);
     done()
   } catch (error) {
@@ -111,11 +122,11 @@ email.process("email:promocionProyecto", async (job, done) => {
 
 // Colas para envío de archivos -----------------------------------------------------------------------------------------------------------
 
-const file = new Queue("file",{redis: config.redis});
-file.process((job, done) => fileWorker(job,done));
+// const file = new Queue("file",{redis: config.redis});
+// file.process((job, done) => fileWorker(job,done));
 
-const fileUpdate = new Queue("fileUpdate",{redis: config.redis});
-fileUpdate.process((job, done) => ActualizarDocumentsWotker(job,done));
+// const fileUpdate = new Queue("fileUpdate",{redis: config.redis});
+// fileUpdate.process((job, done) => ActualizarDocumentsWotker(job,done));
 
 const fileCv = new Queue("fileCv",{redis: config.redis});
 fileCv.process((job, done) => UploadCv(job,done));
@@ -139,14 +150,6 @@ const processFeria = (tipo) => {
   });
 };
 
-// Configurar opciones de cola
-const options = {
-  attempts: 5, 
-  backoff: {
-    type: 'exponential',
-    delay: 2000, // Retraso inicial en milisegundos
-  },
-};
 
 // Implementación de los procesos relacionados con cada fecha de la feria que genere un cambio de estado
 processFeria('inicioFeria', options);
@@ -245,14 +248,19 @@ export const queues = [
       hostId: "Email Queue Manager",
       redis: config.redis,
     },
+    // {
+    //   name:"file",
+    //   hostId:"File Queue Manager",
+    //   redis: config.redis,
+    // },
+    // {
+    //   name:"fileUpdate",
+    //   hostId:"File Update Queue Manager",
+    //   redis: config.redis,
+    // },
     {
-      name:"file",
-      hostId:"File Queue Manager",
-      redis: config.redis,
-    },
-    {
-      name:"fileUpdate",
-      hostId:"File Update Queue Manager",
+      name:"fileCv",
+      hostId:"CV File Queue Manager",
       redis: config.redis,
     },
     {
@@ -262,7 +270,7 @@ export const queues = [
     },
     {
       name:"files_",
-      hostId:"File Upload/Update Queue Manager",
+      hostId:"Documentos de Proyecto Queue Manager (Upload/Update)",
       redis: config.redis,
     },
     {
