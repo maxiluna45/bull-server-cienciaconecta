@@ -163,7 +163,8 @@ const actualizarEstablecimientos = async (files, job) => {
         }
 
         const workbook = xlsx.read(archivo.filepath, { type: 'file' });
-        const worksheet = workbook.Sheets['padron'];
+        const worksheetName = workbook.SheetNames[0]; // Obtener el nombre de la primera Sheet
+        const worksheet = workbook.Sheets[worksheetName];
 
         // Convertir el contenido del archivo Excel a un arreglo de objetos
         const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, range: 14 });
@@ -316,8 +317,9 @@ const crearEstablecimientos = async (files, job) => {
         }
 
         const workbook = xlsx.read(archivo.filepath, { type: 'file' });
-        const worksheet = workbook.Sheets['padron'];
-
+        const worksheetName = workbook.SheetNames[0]; // Obtener el nombre de la primera Sheet
+        const worksheet = workbook.Sheets[worksheetName];
+        
         // Convertir el contenido del archivo Excel a un arreglo de objetos
         const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, range: 14 });
 
