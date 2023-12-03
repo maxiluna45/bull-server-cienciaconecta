@@ -1,4 +1,5 @@
 import { generarNotificacion, tipo_notificacion } from "../helpers/generarNotificacion.js";
+import { roles } from "../helpers/roles.js";
 import { Docente } from "../models/Docente.js";
 import { Evaluacion, estadoEvaluacion } from "../models/Evaluacion.js";
 import { EvaluacionExposicion, estadoEvaluacionExposicion } from "../models/EvaluacionExposicion.js";
@@ -90,6 +91,7 @@ export const modificarEstadosFeria = async (feria_id, tipo) => {
         } else if (tipo == "finFeria"){
             feria.estado = estadoFeria.finalizada;
             await actualizarProyectos_Finalizado(feria._id)
+            await quitarRoles()
         } else if (tipo == "inicioAsignacion") {
 
             const referentes = await Referente.find({feria: feria._id})
@@ -324,3 +326,20 @@ const actualizarProyectos_Finalizado = async (feria_id) => {
         { $set: { estado: estado.finalizado } }
     );
 };
+
+
+const quitarRoles = async () => {
+    try {
+      const rolesAQuitar = [roles.responsableProyecto, roles.evaluador, roles.refEvaluador];
+  
+      // Actualiza todos los usuarios eliminando los roles especificados
+      await Usuario.updateMany(
+        { roles: { $in: rolesAQuitar } },
+        { $pull: { roles: { $in: rolesAQuitar } } }
+      );
+  
+      console.log('Roles quitados exitosamente.');
+    } catch (error) {
+      console.error('Error al quitar roles:', error);
+    }
+  };
