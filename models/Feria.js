@@ -51,22 +51,31 @@ const feriaSchema = new Schema({
                 type: Date,
                 required: [true , 'La fecha de promoción de proyectos a instancia provincial es obligatoria'],
             },
-            cupos: [{
-                sede: {
-                    type: Schema.Types.ObjectId,
-                    required: true,
-                    ref: 'EstablecimientoEducativo',
-                },
-                nivel: {
-                    type: Schema.Types.ObjectId,
-                    required: true,
-                    ref: 'Nivel',
-                },
-                cantidad: {
-                    type: Number,
-                    required: true,
-                }
-            }],
+            cupos: {
+                porNivel: [{
+                    nivel: {
+                        type: Schema.Types.ObjectId,
+                        required: true,
+                        ref: 'Nivel',
+                    },
+                    cantidad: {
+                        type: Number,
+                        required: true,
+                    }
+                }],
+                porSede: [{
+                    sede: {
+                        type: Schema.Types.ObjectId,
+                        required: true,
+                        ref: 'EstablecimientoEducativo',
+                    },
+                    cantidad: {
+                        type: Number,
+                        required: true,
+                    }
+                }]
+
+            },
             sedes: {
                 type: [Schema.Types.ObjectId],
                 required: [true , 'Se requiere al menos una sede para instancia regional'],
@@ -97,13 +106,8 @@ const feriaSchema = new Schema({
                     required: true,
                 }
             }],
-            // sede: {
-            //     type: Schema.Types.ObjectId,
-            //     required: false,
-            //     ref: 'EstablecimientoEducativo',
-            // },
-        }
-
+        },
+    
     },
 
     fechaInicioPostulacionEvaluadores: {
@@ -123,13 +127,6 @@ const feriaSchema = new Schema({
         type: Date,
         required: false,
     },
-    
-    // criteriosEvaluacion: {
-    //     type: [Schema.Types.ObjectId],
-    //     required: false,
-    //     ref: 'Rubrica',
-    // },
-
     criteriosEvaluacion: [{
         nombreRubrica: {
             type: String,
