@@ -27,7 +27,8 @@ export const modificarEstadosFeria = async (feria_id, tipo) => {
         } else if (tipo == "inicioEvaluacionRegional"){
             
             feria.estado = estadoFeria.instanciaRegional_EnEvaluacion;
-            
+            await proyectosSinDocumentos(feria)
+
             const proyectos_inicio_evaluacion_regional = await Proyecto.find({feria: feria_id, estado: estado.instanciaRegional})
             let evaluadores_enviado = []; 
             for(const proyecto of proyectos_inicio_evaluacion_regional){
@@ -44,6 +45,8 @@ export const modificarEstadosFeria = async (feria_id, tipo) => {
 
         } else if (tipo == "finEvaluacionRegional"){
             feria.estado = estadoFeria.instanciaRegional_EvaluacionFinalizada;
+            await procesarProyectosNoEvaluados_EvaluacionRegional(feria)
+
         } else if (tipo == "inicioExposicionRegional"){
 
             feria.estado = estadoFeria.instanciaRegional_EnExposicion;
@@ -63,6 +66,8 @@ export const modificarEstadosFeria = async (feria_id, tipo) => {
 
         } else if (tipo == "finExposicionRegional"){
             feria.estado = estadoFeria.instanciaRegional_ExposicionFinalizada;
+            await procesarProyectosNoEvaluados_ExposicionRegional(feria)
+
         } else if (tipo == "promovidosAProvincial"){
             feria.estado = estadoFeria.proyectosPromovidosA_instanciaProvincial;
             await promoverProyectos_InstanciaProvincial(feria._id)
@@ -85,6 +90,8 @@ export const modificarEstadosFeria = async (feria_id, tipo) => {
 
         } else if (tipo == "finExposicionProvincial"){
             feria.estado = estadoFeria.instanciaProvincial_ExposicionFinalizada;
+            await procesarProyectosNoEvaluados_ExposicionProvincial(feria)
+
         } else if (tipo == "promovidosANacional"){
             feria.estado = estadoFeria.proyectosPromovidosA_instanciaNacional;
             await promoverProyectos_InstanciaNacional(feria._id)
@@ -268,6 +275,12 @@ const promoverProyectos_InstanciaProvincial = async (feria_id) => {
         { $set: { estado: estado.promovidoProvincial } }
     );
 
+    await Proyecto.updateMany(
+        { _id: { $nin: proyectosPromocionados }, feria: feria_id, estado: estado.evaluadoRegional },
+        { $set: { estado: estado.finalizado } }
+    );
+
+
     for(const proyecto_id of proyectosPromocionados){
         const proyecto = await Proyecto.findById(proyecto_id.toString())
         const docente = await Docente.findById(proyecto.idResponsable.toString())
@@ -297,6 +310,11 @@ const promoverProyectos_InstanciaNacional = async (feria_id) => {
     await Proyecto.updateMany(
         { _id: { $in: proyectosPromocionados } },
         { $set: { estado: estado.promovidoNacional } }
+    );
+
+    await Proyecto.updateMany(
+        { _id: { $nin: proyectosPromocionados }, feria: feria_id, estado: estado.evaluadoProvincial },
+        { $set: { estado: estado.finalizado } }
     );
 
     for(const proyecto_id of proyectosPromocionados){
@@ -343,3 +361,161 @@ const quitarRoles = async () => {
       console.error('Error al quitar roles:', error);
     }
   };
+
+
+
+export const procesarProyectosNoEvaluados_EvaluacionRegional = async (feria) => {
+    
+    try {
+        const proyectosNoEvaluados = await Proyecto.find({feria: feria._id, estado: {$in: [estado.enEvaluacionRegional, estado.instanciaRegional]} })
+        
+        await Promise.all(proyectosNoEvaluados.map(async (proyecto) => {
+            const evaluacion = await Evaluacion.findOne({proyectoId: proyecto._id})
+
+            if(!evaluacion) {
+                const evaluacion_vacia = new Evaluacion({
+                    evaluacion: null,
+                    evaluadorId: [],
+                    proyectoId: proyecto.id,
+                    puntajeTeorico: 0,
+                    listo: [],
+                    estado: estadoEvaluacion.cerrada,
+                    ultimaEvaluacion: null,
+                    evaluando: null,
+                })
+                await evaluacion_vacia.save()
+
+            } else if (evaluacion.estado == estadoEvaluacion.abierta || evaluacion.estado == estadoEvaluacion.enEvaluacion){
+                evaluacion.estado = estadoEvaluacion.cerrada
+                evaluacion.evaluando = null;
+                if(evaluacion.puntajeTeorico == -1){
+                    evaluacion.puntajeTeorico = 0;
+                }
+                await evaluacion.save()
+            } 
+
+            if(proyecto.estado != estado.enEvaluacionRegional){
+                proyecto.estado = estado.enEvaluacionRegional;
+                await proyecto.save()
+            }
+
+
+        }));
+
+    } catch (error) {
+        console.error('Error procesar los proyectos:', error);
+    }
+}
+
+
+export const procesarProyectosNoEvaluados_ExposicionRegional = async (feria) => {
+    
+    try {
+        const proyectosNoEvaluados = await Proyecto.find({feria: feria._id, estado: {$in: [estado.enEvaluacionRegional]} })
+        
+        await Promise.all(proyectosNoEvaluados.map(async (proyecto) => {
+            const exposicion = await EvaluacionExposicion.findOne({proyectoId: proyecto._id})
+            const evaluacion = await Evaluacion.findOne({proyectoId: proyecto._id})
+
+            if(!exposicion) {
+                const evaluacion_vacia = new Evaluacion({
+                    evaluacion: null,
+                    evaluadorId: [],
+                    proyectoId: proyecto.id,
+                    puntajeExposicion: 0,
+                    puntajeFinal: evaluacion.puntajeTeorico,
+                    listo: [],
+                    estado: estadoEvaluacionExposicion.cerrada,
+                    ultimaEvaluacion: null,
+                    evaluando: null
+                  })
+                await evaluacion_vacia.save()
+
+            } else if (exposicion.estado == estadoEvaluacionExposicion.abierta || exposicion.estado == estadoEvaluacionExposicion.enEvaluacion){
+                exposicion.estado = estadoEvaluacionExposicion.cerrada
+                exposicion.evaluando = null;
+                if(exposicion.puntajeFinal == -1){
+                    exposicion.puntajeFinal = 0;
+                }
+                if(exposicion.puntajeExposicion == -1){
+                    exposicion.puntajeExposicion = 0;
+                }
+                await exposicion.save()
+            } 
+
+            proyecto.estado = estado.evaluadoRegional;
+            proyecto.save()
+
+
+        }));
+
+    } catch (error) {
+        console.error('Error procesar los proyectos:', error);
+    }
+}
+
+
+export const procesarProyectosNoEvaluados_ExposicionProvincial = async (feria) => {
+    
+    try {
+        const proyectosNoEvaluados = await Proyecto.find({feria: feria._id, estado: {$in: [estado.enEvaluacionProvincial, estado.promovidoProvincial]} })
+        
+        await Promise.all(proyectosNoEvaluados.map(async (proyecto) => {
+            const exposicion = await EvaluacionExposicionProvincial.findOne({proyectoId: proyecto._id})
+
+            if(!exposicion) {
+                const evaluacion_vacia = new Evaluacion({
+                    evaluacion: null,
+                    evaluadorId: [],
+                    proyectoId: proyecto.id,
+                    puntajeExposicion: 0,
+                    listo: [],
+                    estado: estadoEvaluacionExposicionProvincial.cerrada,
+                    ultimaEvaluacion: null,
+                    evaluando: null
+                  })
+                await evaluacion_vacia.save()
+
+            } else if (exposicion.estado == estadoEvaluacionExposicionProvincial.abierta || exposicion.estado == estadoEvaluacionExposicionProvincial.enEvaluacion){
+                exposicion.estado = estadoEvaluacionExposicionProvincial.cerrada
+                exposicion.evaluando = null;
+                if(exposicion.puntajeExposicion == -1){
+                    exposicion.puntajeExposicion = 0;
+                }
+                await exposicion.save()
+            } 
+
+            proyecto.estado = estado.evaluadoProvincial;
+            proyecto.save()
+
+
+        }));
+
+    } catch (error) {
+        console.error('Error procesar los proyectos:', error);
+    }
+}
+
+
+const proyectosSinDocumentos = async (feria) => {
+    try {
+        const proyectos = await Proyecto.find({feria: feria._id, estado: estado.instanciaRegional})
+        await Promise.all(proyectos.map(async (proyecto) => {
+            if (proyecto.videoPresentacion == null ||
+                proyecto.registroPedagogico == null ||
+                proyecto.carpetaCampo == null ||
+                proyecto.informeTrabajo == null ||
+                proyecto.autorizacionImagen == null){
+
+                    proyecto.estado = estado.finalizado;
+                    proyecto.save()
+
+                    const docente = await Docente.findById({_id: proyecto.idResponsable.toString()})
+                    await generarNotificacion(docente.usuario.toString(), tipo_notificacion.documentos_no_cargados(proyecto.titulo))
+            }
+        }));
+
+    } catch (error) {
+        console.error('Error procesar los proyectos:', error);
+    }
+}

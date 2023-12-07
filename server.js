@@ -20,7 +20,27 @@ class Server {
     }
 
     middlewares(){
-        //this.app.use(cors({ origin: '*' }));
+        //CORS
+        this.app.use(cors({origin: '*'}));
+
+        // this.app.use(function (req, res, next) {
+        //     req.headers.origin = req.headers.origin || 'http://' + req.headers.host;
+        //     next();
+        //   });
+        // //test cors
+        // const whitelist = [process.env.ORIGIN1]
+
+        // this.app.use(cors(
+        //      {
+        //      origin: function(origin, callback){
+        //          if(whitelist.includes(origin)){
+        //              return callback(null, origin) 
+        //          }
+        //          return callback("Error de CORS - Origin: " + origin + " No autorizado")
+        //      },
+        //      credentials: true  
+        //      }
+        // ))
     }
     
     arena(queues) {
