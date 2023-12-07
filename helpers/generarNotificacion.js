@@ -46,5 +46,5 @@ export const tipo_notificacion = {
     carga_fallida_proyecto: (proyecto) => `La carga de los documentos del proyecto ${proyecto} ha fallado. Por favor, intentá nuevamente más tarde.`,
     carga_exitosa_cv: `La carga de tu CV ha finalizado exitosamente.`,
     carga_fallida_cv: `La carga de tu CV ha fallado. Por favor, intentá postularte como evaluador nuevamente.`,
-
+    documentos_no_cargados: (proyecto) => `No has cargado los documentos solicitados del proyecto ${proyecto}. Por lo tanto, tu proyecto ha finalizado.`
 }
