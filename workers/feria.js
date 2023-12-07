@@ -275,11 +275,6 @@ const promoverProyectos_InstanciaProvincial = async (feria_id) => {
         { $set: { estado: estado.promovidoProvincial } }
     );
 
-    await Proyecto.updateMany(
-        { _id: { $nin: proyectosPromocionados }, feria: feria_id, estado: estado.evaluadoRegional },
-        { $set: { estado: estado.finalizado } }
-    );
-
 
     for(const proyecto_id of proyectosPromocionados){
         const proyecto = await Proyecto.findById(proyecto_id.toString())
@@ -299,6 +294,11 @@ const promoverProyectos_InstanciaProvincial = async (feria_id) => {
         const docente = await Docente.findById(proyecto.idResponsable)
         await generarNotificacion(docente.usuario.toString(), tipo_notificacion.no_promocion(proyecto.titulo, "Provincial"))
     }
+
+    await Proyecto.updateMany(
+        { _id: { $nin: proyectosPromocionados }, feria: feria_id, estado: estado.evaluadoRegional },
+        { $set: { estado: estado.finalizado } }
+    );
 };
 
 
@@ -310,11 +310,6 @@ const promoverProyectos_InstanciaNacional = async (feria_id) => {
     await Proyecto.updateMany(
         { _id: { $in: proyectosPromocionados } },
         { $set: { estado: estado.promovidoNacional } }
-    );
-
-    await Proyecto.updateMany(
-        { _id: { $nin: proyectosPromocionados }, feria: feria_id, estado: estado.evaluadoProvincial },
-        { $set: { estado: estado.finalizado } }
     );
 
     for(const proyecto_id of proyectosPromocionados){
@@ -335,6 +330,11 @@ const promoverProyectos_InstanciaNacional = async (feria_id) => {
         const docente = await Docente.findById(proyecto.idResponsable)
         await generarNotificacion(docente.usuario.toString(), tipo_notificacion.no_promocion(proyecto.titulo, "Nacional"))
     }
+
+    await Proyecto.updateMany(
+        { _id: { $nin: proyectosPromocionados }, feria: feria_id, estado: estado.evaluadoProvincial },
+        { $set: { estado: estado.finalizado } }
+    );
 };
 
 
@@ -418,7 +418,7 @@ export const procesarProyectosNoEvaluados_ExposicionRegional = async (feria) => 
             const evaluacion = await Evaluacion.findOne({proyectoId: proyecto._id})
 
             if(!exposicion) {
-                const evaluacion_vacia = new Evaluacion({
+                const evaluacion_vacia = new EvaluacionExposicion({
                     evaluacion: null,
                     evaluadorId: [],
                     proyectoId: proyecto.id,
@@ -464,7 +464,7 @@ export const procesarProyectosNoEvaluados_ExposicionProvincial = async (feria) =
             const exposicion = await EvaluacionExposicionProvincial.findOne({proyectoId: proyecto._id})
 
             if(!exposicion) {
-                const evaluacion_vacia = new Evaluacion({
+                const evaluacion_vacia = new EvaluacionExposicionProvincial({
                     evaluacion: null,
                     evaluadorId: [],
                     proyectoId: proyecto.id,
@@ -501,11 +501,11 @@ const proyectosSinDocumentos = async (feria) => {
     try {
         const proyectos = await Proyecto.find({feria: feria._id, estado: estado.instanciaRegional})
         await Promise.all(proyectos.map(async (proyecto) => {
-            if (proyecto.videoPresentacion == null ||
-                proyecto.registroPedagogico == null ||
-                proyecto.carpetaCampo == null ||
-                proyecto.informeTrabajo == null ||
-                proyecto.autorizacionImagen == null){
+            if (proyecto.videoPresentacion === null || proyecto.videoPresentacion === undefined ||
+                proyecto.registroPedagogico === null || proyecto.registroPedagogico === undefined ||
+                proyecto.carpetaCampo === null || proyecto.carpetaCampo === undefined ||
+                proyecto.informeTrabajo === null || proyecto.informeTrabajo === undefined ||
+                proyecto.autorizacionImagen === null || proyecto.autorizacionImagen === undefined){
 
                     proyecto.estado = estado.finalizado;
                     proyecto.save()
